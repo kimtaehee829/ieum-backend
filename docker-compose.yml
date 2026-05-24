@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: ieum_mysql
+    platform: linux/amd64
+    environment:
+      MYSQL_DATABASE: ieum_db
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_USER: ieum_user
+      MYSQL_PASSWORD: ieum_password
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:
