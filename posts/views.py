@@ -6,7 +6,9 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q
 from .models import Post, Clue, Tag
-from .serializers import PostListSerializer
+from .serializers import PostListSerializer, PostSerializer
+from django.shortcuts import get_object_or_404
+from rest_framework.exceptions import PermissionDenied
 
 class PostListCreateView(APIView):
     permission_classes = [IsAuthenticated]
@@ -83,3 +85,43 @@ class PostListCreateView(APIView):
             },
             status=status.HTTP_201_CREATED
         )
+
+class PostDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self, post_id):
+        return get_object_or_404(Post, id=post_id)
+
+    def get(self, request, post_id):
+        post = self.get_object(post_id)
+        serializer = PostSerializer(post)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def patch(self, request, post_id):
+        post = self.get_object(post_id)
+
+        if post.author != request.user:
+            raise PermissionDenied("게시글을 수정할 권한이 없습니다.")
+
+        serializer = PostSerializer(post, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {
+                    "message": "게시글이 성공적으로 수정되었습니다.",
+                    "data": serializer.data
+                },
+                status=status.HTTP_200_OK
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, post_id):
+        post = self.get_object(post_id)
+
+        if post.author != request.user:
+            raise PermissionDenied("게시글을 삭제할 권한이 없습니다.")
+
+        post.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)

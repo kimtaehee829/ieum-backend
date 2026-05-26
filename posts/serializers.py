@@ -36,7 +36,7 @@ class PostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ['post_id', 'author_username', 'title', 'content', 'tags', 'clues', 'created_at']
+        fields = ['post_id', 'author_username', 'title', 'content', 'tags', 'clues', 'created_at', 'updated_at']
 
 class PostListSerializer(serializers.ModelSerializer):
     post_id = serializers.IntegerField(source='id', read_only=True)
