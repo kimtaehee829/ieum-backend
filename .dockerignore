@@ -1,0 +1,13 @@
+.DS_Store
+.env
+.git
+.github
+.pytest_cache
+.ruff_cache
+.venv
+__pycache__
+*.pyc
+db.sqlite3
+htmlcov
+staticfiles
+media

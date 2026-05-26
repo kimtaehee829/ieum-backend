@@ -10,23 +10,44 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import os
+from datetime import timedelta
 from pathlib import Path
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+def env_bool(name, default=False):
+    value = os.environ.get(name)
+
+    if value is None:
+        return default
+
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def env_list(name, default=""):
+    value = os.environ.get(name, default)
+    return [item.strip() for item in value.split(",") if item.strip()]
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-e5rn@55tr0r!w)3%f&u_8x@2ay=@_((8@!z4ozdf3i^g@^&f0q'
+SECRET_KEY = os.environ.get(
+    "DJANGO_SECRET_KEY",
+    "django-insecure-e5rn@55tr0r!w)3%f&u_8x@2ay=@_((8@!z4ozdf3i^g@^&f0q",
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env_bool("DJANGO_DEBUG", True)
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = env_list(
+    "DJANGO_ALLOWED_HOSTS",
+    "localhost,127.0.0.1",
+)
 
 # Application definition
 
@@ -46,6 +67,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -79,12 +101,12 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'ieum_db',
-        'USER': 'ieum_user',
-        'PASSWORD': 'ieum_password',
-        'HOST': '127.0.0.1',
-        'PORT': '3307',
+    'ENGINE': 'django.db.backends.mysql',
+    'NAME': os.environ.get('DB_NAME', 'ieum_db'),
+    'USER': os.environ.get('DB_USER', 'ieum_user'),
+    'PASSWORD': os.environ.get('DB_PASSWORD', 'ieum_password'),
+    'HOST': os.environ.get('DB_HOST', '127.0.0.1'),
+    'PORT': os.environ.get('DB_PORT', '3307'),
     }
 }
 
@@ -124,6 +146,20 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+CORS_ALLOWED_ORIGINS = env_list(
+    "CORS_ALLOWED_ORIGINS",
+    "http://localhost:5500,https://sunyoungs.github.io",
+)
+
+CSRF_TRUSTED_ORIGINS = env_list(
+    "CSRF_TRUSTED_ORIGINS",
+    "http://localhost:5500,https://sunyoungs.github.io",
+)
 
 AUTH_USER_MODEL = 'users.User'
 
@@ -134,13 +170,7 @@ REST_FRAMEWORK = {
     ),
 }
 
-from datetime import timedelta
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
 }
-
-MEDIA_URL = '/media/'
-
-import os
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
