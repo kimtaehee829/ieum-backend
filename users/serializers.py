@@ -22,3 +22,12 @@ class UserSerializer(serializers.ModelSerializer):
             sns_link=validated_data.get('sns_link', '')
         )
         return user
+
+class ProfileSerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField(source='id', read_only=True)
+    created_at = serializers.DateTimeField(source='date_joined', read_only=True)
+
+    class Meta:
+        model = User
+        fields = ['user_id', 'username', 'sns_link', 'created_at']
+        read_only_fields = ['username']
