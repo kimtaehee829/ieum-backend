@@ -25,6 +25,7 @@ class ClueSerializer(serializers.ModelSerializer):
 class PostSerializer(serializers.ModelSerializer):
     post_id = serializers.IntegerField(source='id', read_only=True)
     author_username = serializers.CharField(source='author.username', read_only=True)
+    author_sns_link = serializers.CharField(source='author.sns_link', read_only=True)
 
     tags = serializers.SlugRelatedField(
         many=True,
@@ -36,7 +37,7 @@ class PostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ['post_id', 'author_username', 'title', 'content', 'tags', 'clues', 'created_at', 'updated_at']
+        fields = ['post_id', 'author_username', 'author_sns_link', 'title', 'content', 'tags', 'clues', 'created_at', 'updated_at']
 
 class PostListSerializer(serializers.ModelSerializer):
     post_id = serializers.IntegerField(source='id', read_only=True)
