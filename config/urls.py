@@ -16,8 +16,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from django.conf import settings               # 👈 추가
+from django.conf import settings
 from django.conf.urls.static import static
+from django.http import JsonResponse
+from django.utils import timezone
 from config.views import health_check
 
 urlpatterns = [
@@ -29,3 +31,13 @@ urlpatterns = [
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+def custom_404_view(request, exception=None):
+    return JsonResponse({
+        "status": 404,
+        "error_code": "NOT_FOUND",
+        "message": "요청하신 API 주소를 찾을 수 없습니다.",
+        "timestamp": timezone.now().strftime('%Y-%m-%dT%H:%M:%SZ')
+    }, status=404)
+
+handler404 = custom_404_view
