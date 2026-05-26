@@ -5,11 +5,11 @@ on:
     branches: [ "main" ]
 
 env:
-  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }} # GCP 프로젝트 ID
-  REGION: asia-northeast3                   # GCP 서울 리전
-  REPO_NAME: ieum-backend                   # Artifact Registry 저장소 이름
-  IMAGE_NAME: ieum-backend                  # 도커 이미지 이름
-  SERVICE_NAME: ieum-backend-api            # Cloud Run 서비스 이름
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  REGION: ${{ secrets.GCP_REGION }}
+  REPO_NAME: ${{ secrets.GAR_REPOSITORY }}
+  IMAGE_NAME: ieum-backend
+  SERVICE_NAME: ${{ secrets.CLOUD_RUN_SERVICE }}
 
 jobs:
   build-and-deploy:
@@ -22,7 +22,7 @@ jobs:
       - name: GCP Authenticate
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
 
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
