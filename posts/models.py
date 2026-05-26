@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.core.validators import FileExtensionValidator
 
 
 class Tag(models.Model):
@@ -35,7 +36,15 @@ class Clue(models.Model):
 
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='clues')
 
-    file = models.FileField(upload_to='clues/%Y/%m/%d/', verbose_name="첨부파일")
+    file = models.FileField(
+        upload_to='clues/%Y/%m/%d/',
+        verbose_name="첨부파일",
+        validators=[FileExtensionValidator(allowed_extensions=[
+            'jpg', 'jpeg', 'png', 'webp',  # 이미지
+            'mp4', 'mov',  # 영상
+            'mp3', 'wav', 'm4a'  # 음성
+        ])]
+    )
 
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="업로드일")
 
