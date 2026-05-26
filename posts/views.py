@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q
-from .models import Post, Clue
+from .models import Post, Clue, Tag
 from .serializers import PostSerializer
 
 
@@ -26,15 +26,33 @@ class PostListCreateView(APIView):
         return Response(serializer.data)
 
     def post(self, request):
-        serializer = PostSerializer(data=request.data)
-        if serializer.is_valid():
-            post = serializer.save(author=request.user)
+        title = request.data.get('title')
+        content = request.data.get('content')
+        files = request.FILES.getlist('clues')
+        tags_data = request.data.getlist('tags')
 
-            files = request.FILES.getlist('clues')
+        if len(files) > 3:
+            return Response(
+                {"error": "단서 사진은 최대 3장까지만 업로드할 수 있습니다."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
+        post = Post.objects.create(
+            title=title,
+            content=content,
+            author=request.user
+        )
+
+        if tags_data:
+            for tag_name in tags_data:
+                tag_name = tag_name.strip()
+                if tag_name:
+                    tag, created = Tag.objects.get_or_create(name=tag_name)
+                    post.tags.add(tag)
+
+        if files:
             for file in files:
                 Clue.objects.create(post=post, file=file)
 
-            result_serializer = PostSerializer(post)
-            return Response(result_serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer = PostSerializer(post)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
