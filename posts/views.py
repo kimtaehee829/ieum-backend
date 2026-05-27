@@ -32,7 +32,6 @@ class PostListCreateView(APIView):
         title = request.data.get('title')
         content = request.data.get('content')
         files = request.FILES.getlist('clues')
-
         tags_string = request.data.get('tags', '')
 
         if len(files) > 3:
@@ -46,6 +45,28 @@ class PostListCreateView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+        for file in files:
+            ext = file.name.split('.')[-1].lower()
+            size_limit = 0
+
+            if ext in ['jpg', 'jpeg', 'png', 'webp']:
+                size_limit = 10 * 1024 * 1024
+            elif ext in ['mp4', 'mov']:
+                size_limit = 50 * 1024 * 1024
+            elif ext in ['mp3', 'wav', 'm4a']:
+                size_limit = 20 * 1024 * 1024
+
+            if size_limit > 0 and file.size > size_limit:
+                return Response(
+                    {
+                        "status": 413,
+                        "error_code": "FILE_SIZE_EXCEEDED",
+                        "message": f"파일 용량 제한을 초과했습니다. (현재 파일: {ext.upper()})",
+                        "timestamp": timezone.now().strftime('%Y-%m-%dT%H:%M:%SZ')
+                    },
+                    status=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE
+                )
+
         post = Post.objects.create(
             title=title,
             content=content,
@@ -54,7 +75,6 @@ class PostListCreateView(APIView):
 
         if tags_string:
             tag_names = [tag.strip() for tag in tags_string.split(',') if tag.strip()]
-
             for tag_name in tag_names:
                 tag, created = Tag.objects.get_or_create(name=tag_name)
                 post.tags.add(tag)
@@ -67,7 +87,6 @@ class PostListCreateView(APIView):
                     clue.save()
                 except ValidationError as e:
                     post.delete()
-
                     return Response(
                         {
                             "status": 400,
