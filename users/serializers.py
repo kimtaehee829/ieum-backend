@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from posts.models import Post
 
 User = get_user_model()
 
@@ -31,3 +32,11 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = User
         fields = ['user_id', 'username', 'sns_link', 'created_at']
         read_only_fields = ['username']
+
+class MyPostListSerializer(serializers.ModelSerializer):
+    # 명세서 요구사항에 맞게 id를 post_id로 매핑
+    post_id = serializers.IntegerField(source='id', read_only=True)
+
+    class Meta:
+        model = Post
+        fields = ['post_id', 'title', 'created_at']
