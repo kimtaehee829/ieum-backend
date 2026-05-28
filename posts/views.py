@@ -3,27 +3,36 @@ from django.utils import timezone
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q
 from .models import Post, Clue, Tag
 from .serializers import PostListSerializer, PostSerializer
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 class PostListCreateView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get(self, request):
-        search_query = request.query_params.get('search', '')
+        posts = Post.objects.all()
 
+        tag_name = request.GET.get('tag')
+        if tag_name:
+            posts = posts.filter(tags__name=tag_name)
+
+        search_query = request.GET.get('search')
         if search_query:
-            posts = Post.objects.filter(
+            posts = posts.filter(
                 Q(title__icontains=search_query) |
                 Q(content__icontains=search_query) |
                 Q(tags__name__icontains=search_query)
             ).distinct()
+
+        ordering = request.GET.get('ordering', 'newest')
+        if ordering == 'oldest':
+            posts = posts.order_by('created_at')
         else:
-            posts = Post.objects.all()
+            posts = posts.order_by('-created_at')
 
         serializer = PostListSerializer(posts, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -106,7 +115,7 @@ class PostListCreateView(APIView):
         )
 
 class PostDetailView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_object(self, post_id):
         return get_object_or_404(Post, id=post_id)
