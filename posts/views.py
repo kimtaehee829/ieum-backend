@@ -16,9 +16,9 @@ class PostListCreateView(APIView):
     def get(self, request):
         posts = Post.objects.all()
 
-        tag_name = request.GET.get('tag')
-        if tag_name:
-            posts = posts.filter(tags__name=tag_name)
+        tag_names = request.GET.getlist('tag')
+        if tag_names:
+            posts = posts.filter(tags__name__in=tag_names).distinct()
 
         search_query = request.GET.get('search')
         if search_query:
