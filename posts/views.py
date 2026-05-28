@@ -34,7 +34,7 @@ class PostListCreateView(APIView):
         else:
             posts = posts.order_by('-created_at')
 
-        serializer = PostListSerializer(posts, many=True)
+        serializer = PostListSerializer(posts, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
@@ -122,7 +122,7 @@ class PostDetailView(APIView):
 
     def get(self, request, post_id):
         post = self.get_object(post_id)
-        serializer = PostSerializer(post)
+        serializer = PostSerializer(post, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def patch(self, request, post_id):
