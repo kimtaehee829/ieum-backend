@@ -192,3 +192,5 @@ STORAGES = {
 }
 
 GS_BUCKET_NAME = os.environ.get("GCS_BUCKET_NAME", "ieum-497207-uploads")
+
+GS_QUERYSTRING_AUTH = False
