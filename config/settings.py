@@ -155,12 +155,12 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 CORS_ALLOWED_ORIGINS = env_list(
     "CORS_ALLOWED_ORIGINS",
-    "http://localhost:5500,https://sunyoungs.github.io",
+    "http://localhost:5500,http://127.0.0.1:5500,https://sunyoungs.github.io",
 )
 
 CSRF_TRUSTED_ORIGINS = env_list(
     "CSRF_TRUSTED_ORIGINS",
-    "http://localhost:5500,https://sunyoungs.github.io",
+    "http://localhost:5500,http://127.0.0.1:5500,https://sunyoungs.github.io",
 )
 
 AUTH_USER_MODEL = 'users.User'
