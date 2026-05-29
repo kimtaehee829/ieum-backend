@@ -65,6 +65,8 @@ INSTALLED_APPS = [
     'users',
     'posts',
     'rest_framework_simplejwt.token_blacklist',
+    'storages',
+    'django_cleanup.apps.CleanupConfig',
 ]
 
 MIDDLEWARE = [
