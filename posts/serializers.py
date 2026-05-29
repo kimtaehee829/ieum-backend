@@ -42,6 +42,7 @@ class PostSerializer(serializers.ModelSerializer):
 class PostListSerializer(serializers.ModelSerializer):
     post_id = serializers.IntegerField(source='id', read_only=True)
     author_username = serializers.CharField(source='author.username', read_only=True)
+    thumbnail_url = serializers.SerializerMethodField()
 
     tags = serializers.SlugRelatedField(
         many=True,
@@ -51,4 +52,12 @@ class PostListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ['post_id', 'author_username', 'title', 'tags', 'created_at']
+        fields = ['post_id', 'author_username', 'title', 'tags', 'created_at', 'thumbnail_url']
+
+    def get_thumbnail_url(self, obj):
+        first_clue = obj.clues.first()
+
+        if first_clue and first_clue.file:
+            return first_clue.file.url
+
+        return None
