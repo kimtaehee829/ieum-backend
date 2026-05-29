@@ -182,8 +182,6 @@ SIMPLE_JWT = {
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-INSTALLED_APPS += ['storages']
-
 STORAGES = {
     "default": {
         "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
