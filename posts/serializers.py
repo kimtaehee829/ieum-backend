@@ -27,12 +27,7 @@ class PostSerializer(serializers.ModelSerializer):
     author_username = serializers.CharField(source='author.username', read_only=True)
     sns_link = serializers.CharField(source='author.sns_link', read_only=True)
 
-    tags = serializers.SlugRelatedField(
-        many=True,
-        queryset=Tag.objects.all(),  # 이 부분이 추가되어야 수정이 가능합니다!
-        slug_field='name',
-        required=False
-    )
+    tags = serializers.SlugRelatedField(many=True, read_only=True, slug_field='name')
 
     clues = ClueSerializer(many=True, read_only=True)
 
