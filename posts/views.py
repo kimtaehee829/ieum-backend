@@ -9,8 +9,9 @@ from .serializers import PostListSerializer, PostSerializer
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
-import requests
 from django.http import HttpResponse
+import urllib.parse
+from django.http import FileResponse
 
 class PostListCreateView(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
@@ -180,12 +181,19 @@ class FileDownloadView(APIView):
     def get(self, _request, clue_id):
         clue = get_object_or_404(Clue, id=clue_id)
 
-        file_url = clue.file.url
-        response = requests.get(file_url)
+        try:
+            file_handle = clue.file.open('rb')
+        except Exception:
+            return Response(
+                {"error": "스토리지에서 파일을 찾을 수 없습니다."},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
-        filename = clue.file.name.split('/')[-1]
+        original_filename = clue.file.name.split('/')[-1]
 
-        django_response = HttpResponse(response.content, content_type=response.headers['Content-Type'])
-        django_response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        encoded_filename = urllib.parse.quote(original_filename)
 
-        return django_response
+        response = FileResponse(file_handle, content_type='application/octet-stream')
+        response['Content-Disposition'] = f"attachment; filename*=UTF-8''{encoded_filename}"
+
+        return response
