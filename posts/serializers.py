@@ -2,12 +2,13 @@ from rest_framework import serializers
 from .models import Post, Clue, Tag
 
 class ClueSerializer(serializers.ModelSerializer):
+    clue_id = serializers.IntegerField(source='id', read_only=True)
     file_url = serializers.FileField(source='file')
     file_type = serializers.SerializerMethodField()
 
     class Meta:
         model = Clue
-        fields = ['file_type', 'file_url']
+        fields = ['clue_id', 'file_type', 'file_url']
 
     def get_file_type(self, obj):
         if not obj.file:
