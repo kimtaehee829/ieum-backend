@@ -9,6 +9,8 @@ from .serializers import PostListSerializer, PostSerializer
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
+import requests
+from django.http import HttpResponse
 
 class PostListCreateView(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
@@ -153,3 +155,20 @@ class PostDetailView(APIView):
         post.delete()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class FileDownloadView(APIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get(self, _request, clue_id):
+        clue = get_object_or_404(Clue, id=clue_id)
+
+        file_url = clue.file.url
+        response = requests.get(file_url)
+
+        filename = clue.file.name.split('/')[-1]
+
+        django_response = HttpResponse(response.content, content_type=response.headers['Content-Type'])
+        django_response['Content-Disposition'] = f'attachment; filename="{filename}"'
+
+        return django_response
