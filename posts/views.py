@@ -132,18 +132,28 @@ class PostDetailView(APIView):
 
         if post.author != request.user:
             raise PermissionDenied("게시글을 수정할 권한이 없습니다.")
+        tags_data = request.data.get('tags')
 
         serializer = PostSerializer(post, data=request.data, partial=True)
 
         if serializer.is_valid():
-            serializer.save()
+            post_instance = serializer.save()
+
+            if tags_data is not None:
+                post_instance.tags.clear()
+                for tag_name in tags_data:
+                    tag, _ = Tag.objects.get_or_create(name=tag_name)
+                    post_instance.tags.add(tag)
+
+            updated_serializer = PostSerializer(post_instance, context={'request': request})
             return Response(
                 {
                     "message": "게시글이 성공적으로 수정되었습니다.",
-                    "data": serializer.data
+                    "data": updated_serializer.data
                 },
                 status=status.HTTP_200_OK
             )
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, post_id):
