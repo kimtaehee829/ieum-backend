@@ -141,7 +141,15 @@ class PostDetailView(APIView):
 
             if tags_data is not None:
                 post_instance.tags.clear()
-                for tag_name in tags_data:
+
+                if isinstance(tags_data, str):
+                    tag_list = [tag.strip() for tag in tags_data.split(',') if tag.strip()]
+                elif isinstance(tags_data, list):
+                    tag_list = [tag.strip() for tag in tags_data if isinstance(tag, str) and tag.strip()]
+                else:
+                    tag_list = []
+
+                for tag_name in tag_list:
                     tag, _ = Tag.objects.get_or_create(name=tag_name)
                     post_instance.tags.add(tag)
 
@@ -155,7 +163,6 @@ class PostDetailView(APIView):
             )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
     def delete(self, request, post_id):
         post = self.get_object(post_id)
 
