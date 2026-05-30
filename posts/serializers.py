@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Post, Clue
+from .models import Post, Clue, Tag
 
 class ClueSerializer(serializers.ModelSerializer):
     file_url = serializers.FileField(source='file')
@@ -29,8 +29,9 @@ class PostSerializer(serializers.ModelSerializer):
 
     tags = serializers.SlugRelatedField(
         many=True,
-        read_only=True,
-        slug_field='name'
+        queryset=Tag.objects.all(),  # 이 부분이 추가되어야 수정이 가능합니다!
+        slug_field='name',
+        required=False
     )
 
     clues = ClueSerializer(many=True, read_only=True)
